@@ -4,18 +4,21 @@ export async function loadWasm() {
   const MAX_TRY = 10;
   let tryNumber = 0;
   while (MAX_TRY > tryNumber) {
-    tryNumber++
+    tryNumber++;
     await new Promise(resolve => setTimeout(resolve, 500));
-    if (lib.asm != undefined) return
+    if (lib.asm !== undefined) return;
   }
 }
 
 /**
  * get contract script hex (wrapper for wally_elements_pegin_contract_script_from_bytes)
- * @param federationScript 
- * @param scriptIn 
+ * @param federationScript
+ * @param scriptIn
  */
-export function peginContractScriptFromBytes(federationScript: string, scriptIn: string): string {
+export function peginContractScriptFromBytes(
+  federationScript: string,
+  scriptIn: string
+): string {
   const federationScriptBytes = hexStringToBytes(federationScript);
   const scriptInBytes = hexStringToBytes(scriptIn);
 
@@ -33,7 +36,7 @@ export function peginContractScriptFromBytes(federationScript: string, scriptIn:
       "number",
       "number",
       "number",
-      "number",
+      "number"
     ],
     [
       federationScriptBytes,
@@ -43,15 +46,19 @@ export function peginContractScriptFromBytes(federationScript: string, scriptIn:
       0,
       contractPtr,
       federationScriptBytes.length,
-      numOfBytesPtr,
+      numOfBytesPtr
     ]
   );
 
   if (returnCode !== 0) {
-    throw new Error(`wally_elements_pegin_contract_script_from_bytes error: ${returnCode}`)
+    throw new Error(
+      `wally_elements_pegin_contract_script_from_bytes error: ${returnCode}`
+    );
   }
 
-  const contractString = toHexString(readBytes(contractPtr, lib.getValue(numOfBytesPtr)))
+  const contractString = toHexString(
+    readBytes(contractPtr, lib.getValue(numOfBytesPtr))
+  );
   lib._free(contractPtr);
   lib._free(numOfBytesPtr);
   return contractString;
@@ -64,7 +71,7 @@ function readBytes(ptr: number, size: number): Uint8Array {
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function (byte) {
+  return Array.from(byteArray, function(byte) {
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 }

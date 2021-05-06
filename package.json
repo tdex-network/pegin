@@ -1,7 +1,7 @@
 {
-  "name": "wasm",
+  "name": "pegin",
   "version": "0.0.1",
-  "description": "go-elements wasm js ",
+  "description": "TS package using wasm from go-elements and libwally-core",
   "main": "./src/index.js",
   "license": "MIT",
   "devDependencies": {
@@ -21,7 +21,9 @@
   ],
   "scripts": {
     "build": "tsdx build --tsconfig tsconfig.json --entry src/index.ts",
-    "test": "tsdx test"
+    "test": "tsdx test",
+    "lint": "tsdx lint src test --ignore-pattern src/lib/*.js",
+    "lint:fix": "tsdx lint src test --ignore-pattern src/lib/*.js --fix"
   },
   "jest": {
     "testEnvironment": "node"
