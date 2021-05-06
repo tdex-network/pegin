@@ -17,6 +17,7 @@ func main() {
 	select {} // prevents the function to stop
 }
 
+// PeginAddressWrapper returns the js function for pegin.PeginAdress
 func PeginAddressWrapper() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		contract, err := h2b(args[0].String())
@@ -46,6 +47,7 @@ func PeginAddressWrapper() js.Func {
 	})
 }
 
+// ClaimWitnessScriptWrapper returns the js function for pegin.ClaimWitnessScript
 func ClaimWitnessScriptWrapper() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
 		var net *network.Network = &network.Liquid
