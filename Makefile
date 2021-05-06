@@ -5,5 +5,5 @@ help:
 
 ## build: builds the go code to wasm
 build: 
-	GOOS=js GOARCH=wasm go build -o ./src/main.wasm ./main.go
+	GOOS=js GOARCH=wasm go build -o ./main.wasm ./main.go
 	

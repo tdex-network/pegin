@@ -2,7 +2,7 @@ import "./lib/wasm_exec.cjs";
 import { readFileSync } from "fs";
 import { loadWasm, peginContractScriptFromBytes } from "./pegincontract";
 
-const WASM_URL = "src/main.wasm"; // TODO improve this??
+const WASM_URL = "main.wasm"; // TODO improve this??
 
 // @ts-ignore
 const go = new Go();
