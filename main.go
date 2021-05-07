@@ -2,11 +2,16 @@ package main
 
 import (
 	"encoding/hex"
+	"errors"
 	"syscall/js"
 
 	"github.com/btcsuite/btcd/chaincfg"
 	"github.com/vulpemventures/go-elements/network"
 	"github.com/vulpemventures/go-elements/pegin"
+)
+
+var (
+	invalidArgsError = errors.New("invalid number of arguments")
 )
 
 // main binds go wrappers to js global scope functions
@@ -20,6 +25,10 @@ func main() {
 // PeginAddressWrapper returns the js function for pegin.PeginAdress
 func PeginAddressWrapper() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) != 4 {
+			return withError(invalidArgsError)
+		}
+
 		contract, err := h2b(args[0].String())
 		if err != nil {
 			return withError(err)
@@ -50,6 +59,10 @@ func PeginAddressWrapper() js.Func {
 // ClaimWitnessScriptWrapper returns the js function for pegin.ClaimWitnessScript
 func ClaimWitnessScriptWrapper() js.Func {
 	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
+		if len(args) != 2 {
+			return withError(invalidArgsError)
+		}
+
 		var net *network.Network = &network.Liquid
 		if !args[1].Bool() {
 			net = &network.Regtest
