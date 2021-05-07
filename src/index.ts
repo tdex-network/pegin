@@ -1,4 +1,4 @@
-import "./lib/wasm_exec.cjs";
+import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
 import { loadWasm, peginContractScriptFromBytes } from "./pegincontract";
 

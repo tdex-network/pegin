@@ -1,4 +1,4 @@
-const lib = require("./lib/wallycore.js");
+const lib = require("../resources/wallycore.js");
 
 export async function loadWasm() {
   const MAX_TRY = 10;
