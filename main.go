@@ -6,7 +6,6 @@ import (
 	"syscall/js"
 
 	"github.com/btcsuite/btcd/chaincfg"
-	"github.com/vulpemventures/go-elements/network"
 	"github.com/vulpemventures/go-elements/pegin"
 )
 
@@ -16,7 +15,6 @@ var (
 
 // main binds go wrappers to js global scope functions
 func main() {
-	js.Global().Set("claimWitnessScript", ClaimWitnessScriptWrapper())
 	js.Global().Set("peginAddress", PeginAddressWrapper())
 
 	select {} // prevents the function to stop
@@ -53,32 +51,6 @@ func PeginAddressWrapper() js.Func {
 		}
 
 		return withResult(peginAddress)
-	})
-}
-
-// ClaimWitnessScriptWrapper returns the js function for pegin.ClaimWitnessScript
-func ClaimWitnessScriptWrapper() js.Func {
-	return js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		if len(args) != 2 {
-			return withError(invalidArgsError)
-		}
-
-		var net *network.Network = &network.Liquid
-		if !args[1].Bool() {
-			net = &network.Regtest
-		}
-
-		publicKey, err := h2b(args[0].String())
-		if err != nil {
-			return withError(err)
-		}
-
-		claimScript, err := pegin.ClaimWitnessScript(publicKey, net)
-		if err != nil {
-			return withError(err)
-		}
-
-		return withResult(claimScript)
 	})
 }
 

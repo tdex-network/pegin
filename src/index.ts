@@ -2,20 +2,52 @@ import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
 import { loadWasm, peginContractScriptFromBytes } from "./pegincontract";
 
-const WASM_URL = "main.wasm"; // TODO improve this??
-
 // @ts-ignore
 const go = new Go();
+const WASM_URL = "main.wasm"; // TODO improve this??
 
-export interface PeginModule {
+interface WASMPeginModuleInterface {
   peginAddress: (
     contract: string,
-    fedPegScript: string,
+    redeemScript: string,
     isDynaFed: boolean,
     isMainnet: boolean
   ) => string;
-  claimWitnessScript: (publicKey: string, isMainnet: boolean) => string;
   peginContract: (redeemScript: string, script: string) => string;
+}
+
+type PeginModuleOption = (module: PeginModule) => void
+
+export class PeginModule implements WASMPeginModuleInterface {
+  peginAddress: (contract: string, redeemScript: string, isDynaFed: boolean, isMainnet: boolean) => string;
+  peginContract: (redeemScript: string, script: string) => string;
+
+  constructor(option: PeginModuleOption) {
+    this.peginAddress = () => '' // default value
+    this.peginContract = () => ''
+    option(this)
+  }
+
+  public static async withWASM(): Promise<PeginModuleOption> {
+    const wasmModule = await loadPeginFromWasm()
+    return (mod: PeginModule) => {
+      mod.peginAddress = wasmModule.peginAddress
+      mod.peginContract = wasmModule.peginContract
+    }
+  }
+}
+
+/**
+ * get the instance, run wasm and return PeginModule
+ */
+async function loadPeginFromWasm(): Promise<WASMPeginModuleInterface> {
+  const instance = await webAssemblyInstance();
+  go.run(instance);
+  await loadWasm();
+  return {
+    peginAddress: peginAddressJSwrapper,
+    peginContract: peginContractScriptFromBytes
+  };
 }
 
 /**
@@ -45,16 +77,6 @@ function peginAddressJSwrapper(
   );
 }
 
-function claimWitnessScriptJSwrapper(
-  publicKey: string,
-  isMainnet: boolean
-): string {
-  return returnOrThrowIfError<string>(() =>
-    // @ts-ignore
-    claimWitnessScript(publicKey, isMainnet)
-  );
-}
-
 function returnOrThrowIfError<T>(func: () => { result: T; error: string }): T {
   const { result, error } = func();
   if (error) {
@@ -68,16 +90,3 @@ function returnOrThrowIfError<T>(func: () => { result: T; error: string }): T {
   throw new Error("empty return object");
 }
 
-/**
- * get the instance, run wasm and return PeginModule
- */
-export async function loadPeginModule(): Promise<PeginModule> {
-  const instance = await webAssemblyInstance();
-  go.run(instance);
-  await loadWasm();
-  return {
-    peginAddress: peginAddressJSwrapper,
-    claimWitnessScript: claimWitnessScriptJSwrapper,
-    peginContract: peginContractScriptFromBytes
-  };
-}

@@ -1,4 +1,4 @@
-import { loadPeginModule, PeginModule } from "../src";
+import { PeginModule } from "../src";
 import * as assert from "assert";
 import { peginContractFixture } from "./fixtures/pegincontract.fixtures";
 
@@ -6,7 +6,7 @@ describe("peginContract", () => {
   let peginModule: PeginModule;
 
   beforeAll(async () => {
-    peginModule = await loadPeginModule();
+    peginModule = new PeginModule(await PeginModule.withWASM());
   });
 
   it("should compute pegin contract", () => {

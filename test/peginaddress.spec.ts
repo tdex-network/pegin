@@ -1,6 +1,6 @@
 import { peginContractFixture } from "./fixtures/pegincontract.fixtures";
 import * as assert from "assert";
-import { loadPeginModule, PeginModule } from "../src";
+import { PeginModule } from "../src";
 
 jest.setTimeout(10000);
 
@@ -8,7 +8,7 @@ describe("getpeginaddress", () => {
   let peginModule: PeginModule;
 
   beforeAll(async () => {
-    peginModule = await loadPeginModule();
+    peginModule = new PeginModule(await PeginModule.withWASM());
   });
 
   it("should return pegin address", () => {
