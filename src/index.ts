@@ -1,58 +1,68 @@
 import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
-import { wallycoreLoading, peginContractScriptFromBytes } from "./pegincontract";
+import { WallycoreModule } from "./pegincontract";
 
 // @ts-ignore
 const go = new Go();
 const WASM_URL = "main.wasm"; // TODO improve this??
 
+type PeginContractFunction = (redeemScript: string, script: string) => string;
+type PeginAddressFunction = (
+  contract: string,
+  redeemScript: string,
+  isDynaFed: boolean,
+  isMainnet: boolean
+) => string
+
 interface WASMPeginModuleInterface {
-  peginAddress: (
-    contract: string,
-    redeemScript: string,
-    isDynaFed: boolean,
-    isMainnet: boolean
-  ) => string;
-  peginContract: (redeemScript: string, script: string) => string;
+  peginAddress: PeginAddressFunction;
+  peginContract: PeginContractFunction;
 }
 
 type PeginModuleOption = (module: PeginModule) => void;
 
 export class PeginModule implements WASMPeginModuleInterface {
-  peginAddress: (
-    contract: string,
-    redeemScript: string,
-    isDynaFed: boolean,
-    isMainnet: boolean
-  ) => string;
-  peginContract: (redeemScript: string, script: string) => string;
+  peginAddress: PeginAddressFunction;
+  private wallycore: WallycoreModule | undefined;
 
-  constructor(option: PeginModuleOption) {
-    this.peginAddress = () => ""; // default value
-    this.peginContract = () => "";
-    option(this);
+  constructor(options: PeginModuleOption[]) {
+    this.peginAddress = () => ''; // default value
+
+    for (const option of options) {
+      option(this);
+    }
   }
 
-  public static async withWASM(): Promise<PeginModuleOption> {
-    const wasmModule = await loadPeginFromWasm();
+  peginContract: PeginContractFunction = (redeemScript: string, script: string) => {
+    if (!this.wallycore) throw new Error('need wallycore to be defined in order ot use peginContract function');
+    return this.wallycore.peginContract(redeemScript, script);
+  }
+
+  public static async withGoElementsWASM(): Promise<PeginModuleOption> {
+    await runGoWASMinstance();
     return (mod: PeginModule) => {
-      mod.peginAddress = wasmModule.peginAddress;
-      mod.peginContract = wasmModule.peginContract;
+      mod.peginAddress = peginAddressJSwrapper; // set pegin address
+
     };
+  }
+
+  public static async withWallycoreWASM(): Promise<PeginModuleOption> {
+    const wally = await WallycoreModule.create()
+    return (mod: PeginModule) => {
+      mod.wallycore = wally; // set the peginContract function
+    }
+  }
+
+  public static async create(): Promise<PeginModule> {
+    return new PeginModule(
+      await Promise.all([PeginModule.withGoElementsWASM(), PeginModule.withWallycoreWASM()])
+    )
   }
 }
 
-/**
- * get the instance, run wasm and return PeginModule
- */
-async function loadPeginFromWasm(): Promise<WASMPeginModuleInterface> {
+async function runGoWASMinstance() {
   const instance = await webAssemblyInstance();
   go.run(instance);
-  await wallycoreLoading();
-  return {
-    peginAddress: peginAddressJSwrapper,
-    peginContract: peginContractScriptFromBytes
-  };
 }
 
 /**

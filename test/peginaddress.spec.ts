@@ -8,7 +8,7 @@ describe("getpeginaddress", () => {
   let peginModule: PeginModule;
 
   beforeAll(async () => {
-    peginModule = new PeginModule(await PeginModule.withWASM());
+    peginModule = await PeginModule.create()
   });
 
   it("should return pegin address", () => {
