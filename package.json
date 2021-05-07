@@ -20,7 +20,7 @@
     "build-ts": "tsdx build --tsconfig tsconfig.json --entry src/index.ts",
     "copy-wasm": "copyfiles *.wasm dist",
     "build": "yarn build-ts && yarn copy-wasm",
-    "test": "tsdx test",
+    "test": "tsdx test --no-cache",
     "lint": "tsdx lint src test --ignore-pattern src/lib/*.js",
     "lint:fix": "tsdx lint src test --ignore-pattern src/lib/*.js --fix"
   },

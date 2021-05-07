@@ -14,7 +14,7 @@ describe("getpeginaddress", () => {
   it("should return pegin address", () => {
     const address = peginModule.peginAddress(
       peginContractFixture.expectedContract,
-      peginContractFixture.federationScript,
+      peginContractFixture.redeemScript,
       false,
       false
     );

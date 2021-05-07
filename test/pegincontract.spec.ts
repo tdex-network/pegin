@@ -11,8 +11,8 @@ describe("peginContract", () => {
 
   it("should compute pegin contract", () => {
     const contract = peginModule.peginContract(
-      peginContractFixture.federationScript,
-      peginContractFixture.scriptIn
+      peginContractFixture.redeemScript,
+      peginContractFixture.script
     );
     assert.strictEqual(contract, peginContractFixture.expectedContract);
   });

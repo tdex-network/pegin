@@ -15,7 +15,7 @@ export interface PeginModule {
     isMainnet: boolean
   ) => string;
   claimWitnessScript: (publicKey: string, isMainnet: boolean) => string;
-  peginContract: (federationScript: string, scriptIn: string) => string;
+  peginContract: (redeemScript: string, script: string) => string;
 }
 
 /**

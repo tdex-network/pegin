@@ -12,17 +12,17 @@ export async function loadWasm() {
 
 /**
  * get contract script hex (wrapper for wally_elements_pegin_contract_script_from_bytes)
- * @param federationScript
- * @param scriptIn
+ * @param redeemScript
+ * @param script
  */
 export function peginContractScriptFromBytes(
-  federationScript: string,
-  scriptIn: string
+  redeemScript: string,
+  script: string
 ): string {
-  const federationScriptBytes = hexStringToBytes(federationScript);
-  const scriptInBytes = hexStringToBytes(scriptIn);
+  const redeemScriptBytes = hexStringToBytes(redeemScript);
+  const scriptBytes = hexStringToBytes(script);
 
-  const contractPtr = lib._malloc(federationScriptBytes.length);
+  const contractPtr = lib._malloc(redeemScriptBytes.length);
   const numOfBytesPtr = lib._malloc(4);
 
   const returnCode = lib.ccall(
@@ -39,13 +39,13 @@ export function peginContractScriptFromBytes(
       "number"
     ],
     [
-      federationScriptBytes,
-      federationScriptBytes.length,
-      scriptInBytes,
-      scriptInBytes.length,
+      redeemScriptBytes,
+      redeemScriptBytes.length,
+      scriptBytes,
+      scriptBytes.length,
       0,
       contractPtr,
-      federationScriptBytes.length,
+      redeemScriptBytes.length,
       numOfBytesPtr
     ]
   );
@@ -71,7 +71,7 @@ function readBytes(ptr: number, size: number): Uint8Array {
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function(byte) {
+  return Array.from(byteArray, function (byte) {
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 }
