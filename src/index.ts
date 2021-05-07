@@ -1,6 +1,6 @@
 import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
-import { loadWasm, peginContractScriptFromBytes } from "./pegincontract";
+import { wallycoreLoading, peginContractScriptFromBytes } from "./pegincontract";
 
 // @ts-ignore
 const go = new Go();
@@ -16,24 +16,29 @@ interface WASMPeginModuleInterface {
   peginContract: (redeemScript: string, script: string) => string;
 }
 
-type PeginModuleOption = (module: PeginModule) => void
+type PeginModuleOption = (module: PeginModule) => void;
 
 export class PeginModule implements WASMPeginModuleInterface {
-  peginAddress: (contract: string, redeemScript: string, isDynaFed: boolean, isMainnet: boolean) => string;
+  peginAddress: (
+    contract: string,
+    redeemScript: string,
+    isDynaFed: boolean,
+    isMainnet: boolean
+  ) => string;
   peginContract: (redeemScript: string, script: string) => string;
 
   constructor(option: PeginModuleOption) {
-    this.peginAddress = () => '' // default value
-    this.peginContract = () => ''
-    option(this)
+    this.peginAddress = () => ""; // default value
+    this.peginContract = () => "";
+    option(this);
   }
 
   public static async withWASM(): Promise<PeginModuleOption> {
-    const wasmModule = await loadPeginFromWasm()
+    const wasmModule = await loadPeginFromWasm();
     return (mod: PeginModule) => {
-      mod.peginAddress = wasmModule.peginAddress
-      mod.peginContract = wasmModule.peginContract
-    }
+      mod.peginAddress = wasmModule.peginAddress;
+      mod.peginContract = wasmModule.peginContract;
+    };
   }
 }
 
@@ -43,7 +48,7 @@ export class PeginModule implements WASMPeginModuleInterface {
 async function loadPeginFromWasm(): Promise<WASMPeginModuleInterface> {
   const instance = await webAssemblyInstance();
   go.run(instance);
-  await loadWasm();
+  await wallycoreLoading();
   return {
     peginAddress: peginAddressJSwrapper,
     peginContract: peginContractScriptFromBytes
@@ -89,4 +94,3 @@ function returnOrThrowIfError<T>(func: () => { result: T; error: string }): T {
 
   throw new Error("empty return object");
 }
-

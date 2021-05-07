@@ -1,6 +1,6 @@
 const lib = require("../resources/wallycore.js");
 
-export async function loadWasm() {
+export async function wallycoreLoading() {
   const MAX_TRY = 10;
   let tryNumber = 0;
   while (MAX_TRY > tryNumber) {
