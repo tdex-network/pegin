@@ -1,0 +1,3 @@
+FROM debian:buster@sha256:e2cc6fb403be437ef8af68bdc3a89fd58e80b4e390c58f14c77c466002391193
+COPY ./scripts/buster_deps.sh /deps.sh
+RUN /deps.sh && rm /deps.sh

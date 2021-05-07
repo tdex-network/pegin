@@ -9,7 +9,11 @@ wasm-loader:
 	@cp "$(GOROOT)/misc/wasm/wasm_exec.js" ./resources
 	@mv ./resources/wasm_exec.js ./resources/wasm_exec.cjs	
 
+## build-wallycore: craft the wallycore.js file from libwally-core submodule
+build-wallycore:
+	chmod +x ./scripts/compile.sh
+	./scripts/compile.sh
+
 ## build: builds the go code to wasm
 build: 
 	GOOS=js GOARCH=wasm go build -o ./main.wasm ./main.go
-	
