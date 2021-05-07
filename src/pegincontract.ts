@@ -13,19 +13,19 @@ export class WallycoreModule {
     const wallycore = await lib();
     return (mod: WallycoreModule) => {
       mod.wallycore = wallycore;
-    }
+    };
   }
 
   public static async create(): Promise<WallycoreModule> {
-    return new WallycoreModule(await WallycoreModule.withWallycoreWasm())
+    return new WallycoreModule(await WallycoreModule.withWallycoreWasm());
   }
 
   /**
- * get contract script hex (wrapper for wally_elements_pegin_contract_script_from_bytes)
- * @param redeemScript
- * @param script
- */
-  peginContract(redeemScript: string, script: string): string {
+   * get contract script hex (wrapper for wally_elements_pegin_contract_script_from_bytes)
+   * @param redeemScript
+   * @param script
+   */
+  async peginContract(redeemScript: string, script: string): Promise<string> {
     const redeemScriptBytes = hexStringToBytes(redeemScript);
     const scriptBytes = hexStringToBytes(script);
 
@@ -63,11 +63,9 @@ export class WallycoreModule {
       );
     }
 
-    const written = this.wallycore.getValue(numOfBytesPtr)
+    const written = this.wallycore.getValue(numOfBytesPtr);
 
-    const contractString = toHexString(
-      this.readBytes(contractPtr, written)
-    );
+    const contractString = toHexString(this.readBytes(contractPtr, written));
 
     this.wallycore._free(contractPtr);
     this.wallycore._free(numOfBytesPtr);
@@ -76,13 +74,14 @@ export class WallycoreModule {
 
   private readBytes(ptr: number, size: number): Uint8Array {
     const bytes = new Uint8Array(size);
-    for (let i = 0; i < size; i++) bytes[i] = this.wallycore.getValue(ptr + i, "i8");
+    for (let i = 0; i < size; i++)
+      bytes[i] = this.wallycore.getValue(ptr + i, "i8");
     return bytes;
   }
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function (byte) {
+  return Array.from(byteArray, function(byte) {
     return ("0" + (byte & 0xff).toString(16)).slice(-2);
   }).join("");
 }

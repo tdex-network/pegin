@@ -9,8 +9,8 @@ describe("peginContract", () => {
     peginModule = await PeginModule.create();
   });
 
-  it("should compute pegin contract", () => {
-    const contract = peginModule.peginContract(
+  it("should compute pegin contract", async () => {
+    const contract = await peginModule.peginContract(
       peginContractFixture.redeemScript,
       peginContractFixture.script
     );

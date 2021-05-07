@@ -6,13 +6,16 @@ import { WallycoreModule } from "./pegincontract";
 const go = new Go();
 const WASM_URL = "main.wasm"; // TODO improve this??
 
-type PeginContractFunction = (redeemScript: string, script: string) => string;
+type PeginContractFunction = (
+  redeemScript: string,
+  script: string
+) => Promise<string>;
 type PeginAddressFunction = (
   contract: string,
   redeemScript: string,
   isDynaFed: boolean,
   isMainnet: boolean
-) => string
+) => Promise<string>;
 
 interface WASMPeginModuleInterface {
   peginAddress: PeginAddressFunction;
@@ -26,37 +29,45 @@ export class PeginModule implements WASMPeginModuleInterface {
   private wallycore: WallycoreModule | undefined;
 
   constructor(options: PeginModuleOption[]) {
-    this.peginAddress = () => ''; // default value
+    this.peginAddress = () => new Promise(() => ""); // default value
 
     for (const option of options) {
       option(this);
     }
   }
 
-  peginContract: PeginContractFunction = (redeemScript: string, script: string) => {
-    if (!this.wallycore) throw new Error('need wallycore to be defined in order ot use peginContract function');
+  peginContract: PeginContractFunction = (
+    redeemScript: string,
+    script: string
+  ) => {
+    if (!this.wallycore)
+      throw new Error(
+        "need wallycore to be defined in order ot use peginContract function"
+      );
     return this.wallycore.peginContract(redeemScript, script);
-  }
+  };
 
   public static async withGoElementsWASM(): Promise<PeginModuleOption> {
     await runGoWASMinstance();
     return (mod: PeginModule) => {
       mod.peginAddress = peginAddressJSwrapper; // set pegin address
-
     };
   }
 
   public static async withWallycoreWASM(): Promise<PeginModuleOption> {
-    const wally = await WallycoreModule.create()
+    const wally = await WallycoreModule.create();
     return (mod: PeginModule) => {
       mod.wallycore = wally; // set the peginContract function
-    }
+    };
   }
 
   public static async create(): Promise<PeginModule> {
     return new PeginModule(
-      await Promise.all([PeginModule.withGoElementsWASM(), PeginModule.withWallycoreWASM()])
-    )
+      await Promise.all([
+        PeginModule.withGoElementsWASM(),
+        PeginModule.withWallycoreWASM()
+      ])
+    );
   }
 }
 
@@ -85,22 +96,7 @@ function peginAddressJSwrapper(
   fedPegScript: string,
   isDynaFed: boolean,
   isMainnet: boolean
-): string {
-  return returnOrThrowIfError<string>(() =>
-    // @ts-ignore
-    peginAddress(contract, fedPegScript, isDynaFed, isMainnet)
-  );
-}
-
-function returnOrThrowIfError<T>(func: () => { result: T; error: string }): T {
-  const { result, error } = func();
-  if (error) {
-    throw new Error(error);
-  }
-
-  if (result) {
-    return result;
-  }
-
-  throw new Error("empty return object");
+): Promise<string> {
+  // @ts-ignore
+  return peginAddress(contract, fedPegScript, isDynaFed, isMainnet);
 }

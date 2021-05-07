@@ -8,11 +8,11 @@ describe("getpeginaddress", () => {
   let peginModule: PeginModule;
 
   beforeAll(async () => {
-    peginModule = await PeginModule.create()
+    peginModule = await PeginModule.create();
   });
 
-  it("should return pegin address", () => {
-    const address = peginModule.peginAddress(
+  it("should return pegin address", async () => {
+    const address = await peginModule.peginAddress(
       peginContractFixture.expectedContract,
       peginContractFixture.redeemScript,
       false,
