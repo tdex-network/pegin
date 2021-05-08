@@ -6,68 +6,70 @@ import { WallycoreModule } from "./pegincontract";
 const go = new Go();
 const WASM_URL = "main.wasm"; // TODO improve this??
 
-type PeginContractFunction = (
-  redeemScript: string,
-  script: string
-) => Promise<string>;
-type PeginAddressFunction = (
-  contract: string,
-  redeemScript: string,
-  isDynaFed: boolean,
-  isMainnet: boolean
-) => Promise<string>;
-
-interface WASMPeginModuleInterface {
-  peginAddress: PeginAddressFunction;
-  peginContract: PeginContractFunction;
+interface ElementsPeginInterface {
+  getMainchainAddress(sidechainScript: string): Promise<string>; // returns the mainchain address
 }
 
-type PeginModuleOption = (module: PeginModule) => void;
+type PeginModuleOption = (module: ElementsPegin) => void;
 
-export class PeginModule implements WASMPeginModuleInterface {
-  peginAddress: PeginAddressFunction;
+export class ElementsPegin implements ElementsPeginInterface {
   private wallycore: WallycoreModule | undefined;
+  private isMainnet: boolean = false;
+  private isDynamicFederation: boolean = false;
+  private federationScript: string = "";
 
   constructor(options: PeginModuleOption[]) {
-    this.peginAddress = () => new Promise(() => ""); // default value
-
     for (const option of options) {
       option(this);
     }
   }
 
-  peginContract: PeginContractFunction = (
-    redeemScript: string,
-    script: string
-  ) => {
+  async getMainchainAddress(sidechainScript: string): Promise<string> {
+    const contract = await this.peginContract(
+      this.federationScript,
+      sidechainScript
+    );
+    const peginAddress = await peginAddressJSwrapper(
+      contract,
+      this.federationScript,
+      this.isDynamicFederation,
+      this.isMainnet
+    );
+    return peginAddress;
+  }
+
+  private async peginContract(redeemScript: string, script: string) {
     if (!this.wallycore)
       throw new Error(
         "need wallycore to be defined in order ot use peginContract function"
       );
     return this.wallycore.peginContract(redeemScript, script);
-  };
+  }
 
-  public static async withGoElementsWASM(): Promise<PeginModuleOption> {
-    await runGoWASMinstance();
-    return (mod: PeginModule) => {
-      mod.peginAddress = peginAddressJSwrapper; // set pegin address
+  public static withFederationScript(federationScript: string) {
+    return (module: ElementsPegin) => {
+      module.federationScript = federationScript;
     };
   }
 
-  public static async withWallycoreWASM(): Promise<PeginModuleOption> {
+  public static withDynamicFederation(dynaFed: boolean) {
+    return (module: ElementsPegin) => {
+      module.isDynamicFederation = dynaFed;
+    };
+  }
+
+  public static withNetwork(net: "mainnet" | "regtest") {
+    return (module: ElementsPegin) => {
+      module.isMainnet = net === "mainnet";
+    };
+  }
+
+  public static async withWasm(): Promise<PeginModuleOption> {
+    await runGoWASMinstance(); // for go wasm
     const wally = await WallycoreModule.create();
-    return (mod: PeginModule) => {
-      mod.wallycore = wally; // set the peginContract function
+    return (module: ElementsPegin) => {
+      module.wallycore = wally;
     };
-  }
-
-  public static async create(): Promise<PeginModule> {
-    return new PeginModule(
-      await Promise.all([
-        PeginModule.withGoElementsWASM(),
-        PeginModule.withWallycoreWASM()
-      ])
-    );
   }
 }
 
