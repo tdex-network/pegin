@@ -44,9 +44,9 @@ console.log(address); // Bitcoin address
 ## Project
 
 - The Typescript lib entrypoint is `src/index.ts`.
-- `src/lib/wallycore.js` is the compiled WebAssembly lib from LibwallyCore.
-- `src/lib/wasm_exec.js` is the WebAssembly runner for Golang.
-- `main.wasm` is compiled from wrappers in `main.go`.
+- `resources/wallycore.js` is the compiled WebAssembly lib from LibwallyCore build using `resources/Dockerfile_wallycore`.
+- `resources/wasm_exec.js` is the WebAssembly runner for Golang.
+- `main.wasm` is compiled from wrappers in `main.go` using `resources/Dockerfile`.
 
 ## License
 
