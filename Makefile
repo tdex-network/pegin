@@ -14,6 +14,9 @@ build-wallycore:
 	chmod +x ./scripts/compile.sh
 	./scripts/compile.sh
 
-## build: builds the go code to wasm
-build: 
-	GOOS=js GOARCH=wasm go build -o ./main.wasm ./main.go
+## build-go: builds the go code to wasm
+build-go:
+	DOCKER_BUILDKIT=1 \
+	docker build -f ./resources/Dockerfile --target wasm --output . .
+
+build: build-go build-wallycore
