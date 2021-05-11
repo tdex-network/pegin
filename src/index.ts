@@ -7,7 +7,7 @@ const go = new Go();
 const WASM_URL = "main.wasm"; // TODO improve this??
 
 interface ElementsPeginInterface {
-  getMainchainAddress(sidechainScript: string): Promise<string>; // returns the mainchain address
+  getMainchainAddress(claimScript: string): Promise<string>; // returns the mainchain address
 }
 
 type PeginModuleOption = (module: ElementsPegin) => void;
@@ -24,10 +24,10 @@ export class ElementsPegin implements ElementsPeginInterface {
     }
   }
 
-  async getMainchainAddress(sidechainScript: string): Promise<string> {
+  async getMainchainAddress(claimScript: string): Promise<string> {
     const contract = await this.peginContract(
       this.federationScript,
-      sidechainScript
+      claimScript
     );
     const peginAddress = await peginAddressJSwrapper(
       contract,

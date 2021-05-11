@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # build the pegin container
-docker build -t wallycore . -f ./resources/Dockerfile_libwally
+docker build -t wallycore . -f ./resources/Dockerfile.libwally
 
 # run the container as wallycore-pegin
 docker run --name wallycore-pegin -d -i wallycore
