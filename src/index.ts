@@ -2,7 +2,7 @@ import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
 import { WallycoreModule } from "./pegincontract";
 
-const WASM_URL = "main.wasm"; // TODO improve this??
+const WASM_URL = "resources/main.wasm"; // TODO improve this??
 
 interface ElementsPeginInterface {
   getMainchainAddress(claimScript: string): Promise<string>; // returns the mainchain address
@@ -14,11 +14,11 @@ export class ElementsPegin implements ElementsPeginInterface {
   private wallycore: WallycoreModule | undefined;
   private peginAddress:
     | ((
-        contract: string,
-        fedPegScript: string,
-        isDynaFed: boolean,
-        isMainnet: boolean
-      ) => Promise<string>)
+      contract: string,
+      fedPegScript: string,
+      isDynaFed: boolean,
+      isMainnet: boolean
+    ) => Promise<string>)
     | undefined;
 
   private isMainnet: boolean = true;

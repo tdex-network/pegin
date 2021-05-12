@@ -17,6 +17,6 @@ build-wallycore:
 ## build-go: builds the go code to wasm
 build-go:
 	DOCKER_BUILDKIT=1 \
-	docker build -f ./resources/Dockerfile.goelements --target wasm --output . .
+	docker build -f ./resources/Dockerfile.goelements --target wasm --output ./resources .
 
 build: build-go build-wallycore
