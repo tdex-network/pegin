@@ -11,7 +11,7 @@ describe("getpeginaddress", () => {
     peginModule = new ElementsPegin([
       await ElementsPegin.withWasm(),
       ElementsPegin.withDynamicFederation(false),
-      ElementsPegin.withNetwork("regtest"),
+      ElementsPegin.withMainnet(false),
       ElementsPegin.withFederationScript(peginContractFixture.redeemScript)
     ]);
   });
