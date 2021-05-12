@@ -2,8 +2,6 @@ import "../resources/wasm_exec.cjs";
 import { readFileSync } from "fs";
 import { WallycoreModule } from "./pegincontract";
 
-const WASM_URL = "resources/main.wasm"; // TODO improve this??
-
 interface ElementsPeginInterface {
   getMainchainAddress(claimScript: string): Promise<string>; // returns the mainchain address
 }
@@ -99,12 +97,12 @@ async function runGoWASMinstance() {
 
   if (typeof window === "undefined") {
     // node
-    const mod = await WebAssembly.compile(readFileSync(WASM_URL));
+    const mod = await WebAssembly.compile(readFileSync("./resources/elements.wasm"));
     instance = await WebAssembly.instantiate(mod, go.importObject);
   } else {
     // web
     instance = await WebAssembly.instantiateStreaming(
-      fetch(WASM_URL),
+      fetch("elements.wasm"),
       go.importObject
     );
   }
