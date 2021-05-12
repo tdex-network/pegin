@@ -4,9 +4,10 @@ TypeScript module to pegin Bitcoin into Liquid Bitcoin in the browser
 
 ## Usage
 
-### Compile wasm wrappers & libwally-core wasm lib
+### Compile wasm wrappers
 
 ```
+git submodule update --init
 make build
 ```
 
