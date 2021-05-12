@@ -1,6 +1,6 @@
 FROM golang:1.14.3-alpine AS build
 WORKDIR /src
-COPY . .
+COPY ./resources/go .
 RUN GOOS=js GOARCH=wasm go build -o /out/main.wasm ./main.go
 FROM scratch AS wasm
 COPY --from=build /out/main.wasm /
