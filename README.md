@@ -36,14 +36,16 @@ npm run build
 
 ### Usage
 
-```js
+```ts
+import ElementsPegin from "pegin";
+
 const peginModule = new ElementsPegin(
 	await ElementsPegin.withGoElements(),
 	await ElementsPegin.withLibwally(),
   // Optionals, defaults are dynfed is off, mainnet and hardcoded fedpeg script
   ElementsPegin.withDynamicFederation(false),
   ElementsPegin.withMainnet(),
-  ElementsPegin.withFederationScript("myFedpegscript"),
+  ElementsPegin.withFederationScript("my_Fed_Peg_Script_XXXYYYXXX"),
 );
 
 const address = await peginModule.getMainchainAddress(
