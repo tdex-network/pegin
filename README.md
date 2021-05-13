@@ -6,7 +6,7 @@ TypeScript module to pegin Bitcoin into Liquid Bitcoin in the browser
 
 ### Compile wasm wrappers
 
-```
+```sh
 git submodule update --init 
 # Enter the folder and pull secp as well
 cd libwally-core
@@ -17,19 +17,19 @@ cd ..
 
 Build Go Elements and Libwally to WASM
 
-```
+```sh
 make build
 ```
 
 ### Test
 
-```
+```sh
 npm test
 ```
 
 ### Build the TS lib
 
-```
+```sh
 npm run build
 ```
 
