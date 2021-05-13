@@ -2,7 +2,7 @@
 
 TypeScript module to pegin Bitcoin into Liquid Bitcoin in the browser
 
-## Usage
+## Build & Test
 
 ### Compile wasm wrappers
 
@@ -34,7 +34,7 @@ npm run build
 ```
 
 
-### Usage
+## Usage
 
 ```ts
 import ElementsPegin from "pegin";
