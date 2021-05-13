@@ -1,10 +1,10 @@
-import { peginContractFixture } from "./fixtures/pegincontract.fixtures";
-import * as assert from "assert";
-import ElementsPegin from "../src";
+import { peginContractFixture } from './fixtures/pegincontract.fixtures';
+import * as assert from 'assert';
+import ElementsPegin from '../src';
 
 jest.setTimeout(10000);
 
-describe("getpeginaddress", () => {
+describe('getpeginaddress', () => {
   let peginModule: ElementsPegin;
 
   beforeAll(async () => {
@@ -17,7 +17,7 @@ describe("getpeginaddress", () => {
     );
   });
 
-  it("should return pegin address", async () => {
+  it('should return pegin address', async () => {
     const address = await peginModule.getMainchainAddress(
       peginContractFixture.script
     );
@@ -25,7 +25,7 @@ describe("getpeginaddress", () => {
     assert.notStrictEqual(address, undefined);
   });
 
-  it("should compute pegin contract", async () => {
+  it('should compute pegin contract', async () => {
     const contract = await peginModule.peginContract(
       peginContractFixture.redeemScript,
       peginContractFixture.script
