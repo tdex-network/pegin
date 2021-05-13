@@ -1,0 +1,38 @@
+{
+  "name": "pegin",
+  "version": "0.0.1",
+  "description": "TS package using wasm from go-elements and libwally-core",
+  "main": "./dist/index.js",
+  "files": [
+    "/dist",
+    "/resources/elements.js",
+    "/resources/wasm_exec.js",
+    "/resources/wallycore.js"
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "@types/node": "^15.0.1",
+    "copyfiles": "^2.4.1",
+    "liquidjs-lib": "^5.1.12",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.2.0",
+    "typescript": "^4.2.4"
+  },
+  "scripts": {
+    "build-ts": "tsdx build --tsconfig tsconfig.json --entry src/index.ts",
+    "build": "yarn build-ts && node scripts/encodeBase64",
+    "test": "tsdx test --no-cache",
+    "lint": "tsdx lint src test",
+    "lint:fix": "tsdx lint src test --fix"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  }
+}
