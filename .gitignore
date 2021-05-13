@@ -103,5 +103,7 @@ dist
 # TernJS port file
 .tern-port
 
-/resources/main.wasm
+/resources/elements.wasm
+/resources/elements.js
 /resources/wallycore.js
+/resources/wasm_exec.js

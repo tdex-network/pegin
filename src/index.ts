@@ -1,15 +1,11 @@
-import "../resources/wasm_exec.cjs";
-import { readFileSync } from "fs";
-import { WallycoreModule } from "./pegincontract";
-
 interface ElementsPeginInterface {
   getMainchainAddress(claimScript: string): Promise<string>; // returns the mainchain address
 }
 
 type PeginModuleOption = (module: ElementsPegin) => void;
 
-export class ElementsPegin implements ElementsPeginInterface {
-  private wallycore: WallycoreModule | undefined;
+export default class ElementsPegin implements ElementsPeginInterface {
+  private wallycore: any;
   private peginAddress:
     | ((
       contract: string,
@@ -20,10 +16,10 @@ export class ElementsPegin implements ElementsPeginInterface {
     | undefined;
 
   private isMainnet: boolean = true;
-  private isDynamicFederation: boolean = true;
+  private isDynamicFederation: boolean = false;
   private federationScript: string = ElementsPegin.MAINNET_FED_SCRIPT;
 
-  constructor(options: PeginModuleOption[]) {
+  constructor(...options: PeginModuleOption[]) {
     for (const option of options) {
       option(this);
     }
@@ -33,6 +29,11 @@ export class ElementsPegin implements ElementsPeginInterface {
     if (!this.peginAddress)
       throw new Error(
         "need peginAddress to be defined in order to compute mainchain address"
+      );
+
+    if (!this.wallycore)
+      throw new Error(
+        "need wallycore to be defined in order to compute mainchain address"
       );
 
     const contract = await this.peginContract(
@@ -48,12 +49,64 @@ export class ElementsPegin implements ElementsPeginInterface {
     return peginAddress;
   }
 
-  private async peginContract(redeemScript: string, script: string) {
-    if (!this.wallycore)
+
+  /**
+   * get contract script hex (wrapper for wally_elements_pegin_contract_script_from_bytes)
+   * @param redeemScript
+   * @param script
+   */
+  private async peginContract(redeemScript: string, script: string): Promise<string> {
+    const redeemScriptBytes = hexStringToBytes(redeemScript);
+    const scriptBytes = hexStringToBytes(script);
+
+    const contractPtr = this.wallycore._malloc(redeemScriptBytes.length);
+    const numOfBytesPtr = this.wallycore._malloc(4);
+
+    const returnCode = this.wallycore.ccall(
+      "wally_elements_pegin_contract_script_from_bytes",
+      ["number"],
+      [
+        "array",
+        "number",
+        "array",
+        "number",
+        "number",
+        "number",
+        "number",
+        "number"
+      ],
+      [
+        redeemScriptBytes,
+        redeemScriptBytes.length,
+        scriptBytes,
+        scriptBytes.length,
+        0,
+        contractPtr,
+        redeemScriptBytes.length,
+        numOfBytesPtr
+      ]
+    );
+
+    if (returnCode !== 0) {
       throw new Error(
-        "need wallycore to be defined in order ot use peginContract function"
+        `wally_elements_pegin_contract_script_from_bytes error: ${returnCode}`
       );
-    return this.wallycore.peginContract(redeemScript, script);
+    }
+
+    const written = this.wallycore.getValue(numOfBytesPtr);
+
+    const contractString = toHexString(this.readBytes(contractPtr, written));
+
+    this.wallycore._free(contractPtr);
+    this.wallycore._free(numOfBytesPtr);
+    return contractString;
+  }
+
+  private readBytes(ptr: number, size: number): Uint8Array {
+    const bytes = new Uint8Array(size);
+    for (let i = 0; i < size; i++)
+      bytes[i] = this.wallycore.getValue(ptr + i, "i8");
+    return bytes;
   }
 
   public static withFederationScript(federationScript: string) {
@@ -68,20 +121,33 @@ export class ElementsPegin implements ElementsPeginInterface {
     };
   }
 
-  public static withMainnet(isMainnetPegin: boolean) {
+  public static withMainnet() {
     return (module: ElementsPegin) => {
-      module.isMainnet = isMainnetPegin;
+      module.isMainnet = true;
     };
   }
 
-  public static async withWasm(): Promise<PeginModuleOption> {
-    await runGoWASMinstance(); // set peginAddress in JS global scope
-    const wally = await WallycoreModule.create();
+  public static withTestnet() {
     return (module: ElementsPegin) => {
-      module.wallycore = wally;
-      // @ts-ignore
-      module.peginAddress = peginAddress;
+      module.isMainnet = false;
     };
+  }
+
+  public static async withGoElements(): Promise<PeginModuleOption> {
+    await runGoWASMinstance(); // set peginAddress in JS global scope
+    return (p: ElementsPegin): void => {
+      // @ts-ignore
+      p.peginAddress = peginAddress;
+    }
+  }
+
+  public static async withLibwally(): Promise<PeginModuleOption> {
+    const libwally = require("../resources/wallycore");
+    const wallycore = await libwally();
+    return (p: ElementsPegin): void => {
+      // @ts-ignore
+      p.wallycore = wallycore;
+    }
   }
 
   public static MAINNET_FED_SCRIPT =
@@ -89,6 +155,7 @@ export class ElementsPegin implements ElementsPeginInterface {
 }
 
 async function runGoWASMinstance() {
+  require("../resources/wasm_exec");
   // @ts-ignore
   const go = new Go();
   let instance:
@@ -97,15 +164,37 @@ async function runGoWASMinstance() {
 
   if (typeof window === "undefined") {
     // node
-    const mod = await WebAssembly.compile(readFileSync("./resources/elements.wasm"));
+    const { readFileSync } = require("fs");
+    const path = require("path");
+    const mod = await WebAssembly.compile(readFileSync(path.join(__dirname, "../resources/elements.wasm")));
     instance = await WebAssembly.instantiate(mod, go.importObject);
   } else {
     // web
-    instance = await WebAssembly.instantiateStreaming(
-      fetch("elements.wasm"),
-      go.importObject
-    );
+    const elementsWasmBase64 = require("../resources/elements");
+    var wasmBuffer = Uint8Array.from(atob(elementsWasmBase64.default), c => c.charCodeAt(0))
+    const wasmBytes = await WebAssembly.compile(wasmBuffer);
+    instance = await WebAssembly.instantiate(wasmBytes, go.importObject);
   }
 
   go.run(instance); // set go functions to JS global scope
+}
+
+
+function toHexString(byteArray: Uint8Array): string {
+  return Array.from(byteArray, function (byte) {
+    return ("0" + (byte & 0xff).toString(16)).slice(-2);
+  }).join("");
+}
+
+function hexStringToBytes(str: string): Uint8Array {
+  if (!str) {
+    return new Uint8Array();
+  }
+
+  var a = [];
+  for (var i = 0, len = str.length; i < len; i += 2) {
+    a.push(parseInt(str.substr(i, 2), 16));
+  }
+
+  return new Uint8Array(a);
 }

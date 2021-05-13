@@ -5,9 +5,8 @@ help:
 
 ## wasm-loader: copy web assembly loader from go env
 wasm-loader:
-	@rm ./resources/wasm_exec.cjs || true
-	@cp "$(GOROOT)/misc/wasm/wasm_exec.js" ./resources
-	@mv ./resources/wasm_exec.js ./resources/wasm_exec.cjs	
+	chmod +x ./scripts/pull_wasm_exec.sh
+	./scripts/pull_wasm_exec.sh
 
 ## build-wallycore: craft the wallycore.js file from libwally-core submodule
 build-wallycore:
@@ -19,4 +18,4 @@ build-go:
 	DOCKER_BUILDKIT=1 \
 	docker build -f ./resources/Dockerfile.goelements --target wasm --output ./resources .
 
-build: build-go build-wallycore
+build: wasm-loader build-go build-wallycore

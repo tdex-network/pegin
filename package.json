@@ -5,8 +5,8 @@
   "main": "./dist/index.js",
   "files": [
     "/dist",
-    "/resources/elements.wasm",
-    "/resources/wasm_exec.cjs",
+    "/resources/elements.js",
+    "/resources/wasm_exec.js",
     "/resources/wallycore.js"
   ],
   "license": "MIT",
@@ -21,8 +21,7 @@
   },
   "scripts": {
     "build-ts": "tsdx build --tsconfig tsconfig.json --entry src/index.ts",
-    "copy-wasm": "copyfiles *.wasm dist",
-    "build": "yarn build-ts && yarn copy-wasm",
+    "build": "yarn build-ts && node scripts/encodeBase64",
     "test": "tsdx test --no-cache",
     "lint": "tsdx lint src test --ignore-pattern src/lib/*.js",
     "lint:fix": "tsdx lint src test --ignore-pattern src/lib/*.js --fix"
