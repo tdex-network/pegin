@@ -22,17 +22,22 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
 
-      # - name: Install Nigiri
-      #   run: |
-      #     mkdir -p tmp; cd tmp
-      #     curl https://travis.nigiri.network | bash; cd ..
-      #     docker-compose -f  tmp/docker-compose.yml up -d
-
       - name: Install deps and build (with cache)
         uses: bahmutov/npm-install@v1
 
       - name: Lint
         run: npm run lint
+
+      - name: Compile WASM
+        run: |
+          # git submodules
+          git submodule update --init 
+          cd libwally-core
+          git submodule update --init
+          cd ..
+
+          # compile to wasm with dockers
+          make build
 
       - name: Test
         run: npm test --ci --coverage --maxWorkers=2
