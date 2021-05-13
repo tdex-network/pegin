@@ -1,6 +1,6 @@
 import { peginContractFixture } from "./fixtures/pegincontract.fixtures";
 import * as assert from "assert";
-import { ElementsPegin } from "../src";
+import ElementsPegin from "../src";
 
 jest.setTimeout(10000);
 
@@ -12,7 +12,7 @@ describe("getpeginaddress", () => {
       await ElementsPegin.withGoElements(),
       await ElementsPegin.withLibwally(),
       ElementsPegin.withDynamicFederation(false),
-      ElementsPegin.withMainnet(false),
+      ElementsPegin.withMainnet(),
       ElementsPegin.withFederationScript(peginContractFixture.redeemScript)
     );
   });

@@ -55,7 +55,7 @@ export default class ElementsPegin implements ElementsPeginInterface {
    * @param redeemScript
    * @param script
    */
-  private async peginContract(redeemScript: string, script: string): Promise<string> {
+  async peginContract(redeemScript: string, script: string): Promise<string> {
     const redeemScriptBytes = hexStringToBytes(redeemScript);
     const scriptBytes = hexStringToBytes(script);
 
