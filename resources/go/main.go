@@ -15,13 +15,13 @@ var (
 
 // main binds go wrappers to js global scope functions
 func main() {
-	js.Global().Set("peginAddress", PeginAddressWrapper())
+	js.Global().Set("mainChainAddress", MainChainAddressWrapper())
 
 	select {} // prevents the function to stop
 }
 
-// PeginAddressWrapper returns the js function for pegin.PeginAdress
-func PeginAddressWrapper() js.Func {
+// MainChainAddressWrapper returns the js function for pegin.PeginAdress
+func MainChainAddressWrapper() js.Func {
 	return JSPromise(func(args []js.Value) (interface{}, error) {
 		if len(args) != 4 {
 			return nil, invalidArgsError
@@ -45,7 +45,7 @@ func PeginAddressWrapper() js.Func {
 			btcNet = &chaincfg.RegressionNetParams
 		}
 
-		peginAddress, err := pegin.PeginAddress(contract, btcNet, isDynamicFedEnabled, fedPegScript)
+		peginAddress, err := pegin.MainChainAddress(contract, btcNet, isDynamicFedEnabled, fedPegScript)
 		if err != nil {
 			return nil, err
 		}

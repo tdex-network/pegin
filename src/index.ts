@@ -6,13 +6,13 @@ type PeginModuleOption = (module: ElementsPegin) => void;
 
 export default class ElementsPegin implements ElementsPeginInterface {
   private wallycore: any;
-  private peginAddress:
+  private mainChainAddress:
     | ((
-        contract: string,
-        fedPegScript: string,
-        isDynaFed: boolean,
-        isMainnet: boolean
-      ) => Promise<string>)
+      contract: string,
+      fedPegScript: string,
+      isDynaFed: boolean,
+      isMainnet: boolean
+    ) => Promise<string>)
     | undefined;
 
   private isMainnet: boolean = true;
@@ -26,9 +26,9 @@ export default class ElementsPegin implements ElementsPeginInterface {
   }
 
   async getMainchainAddress(claimScript: string): Promise<string> {
-    if (!this.peginAddress)
+    if (!this.mainChainAddress)
       throw new Error(
-        'need peginAddress to be defined in order to compute mainchain address'
+        'need mainChainAddress to be defined in order to compute mainchain address'
       );
 
     if (!this.wallycore)
@@ -40,13 +40,14 @@ export default class ElementsPegin implements ElementsPeginInterface {
       this.federationScript,
       claimScript
     );
-    const peginAddress = await this.peginAddress(
+
+    const address = await this.mainChainAddress(
       contract,
       this.federationScript,
       this.isDynamicFederation,
       this.isMainnet
     );
-    return peginAddress;
+    return address;
   }
 
   /**
@@ -109,34 +110,34 @@ export default class ElementsPegin implements ElementsPeginInterface {
   }
 
   public static withFederationScript(federationScript: string) {
-    return (module: ElementsPegin) => {
-      module.federationScript = federationScript;
+    return (mod: ElementsPegin) => {
+      mod.federationScript = federationScript;
     };
   }
 
   public static withDynamicFederation(dynaFed: boolean) {
-    return (module: ElementsPegin) => {
-      module.isDynamicFederation = dynaFed;
+    return (mod: ElementsPegin) => {
+      mod.isDynamicFederation = dynaFed;
     };
   }
 
   public static withMainnet() {
-    return (module: ElementsPegin) => {
-      module.isMainnet = true;
+    return (mod: ElementsPegin) => {
+      mod.isMainnet = true;
     };
   }
 
   public static withTestnet() {
-    return (module: ElementsPegin) => {
-      module.isMainnet = false;
+    return (mod: ElementsPegin) => {
+      mod.isMainnet = false;
     };
   }
 
   public static async withGoElements(): Promise<PeginModuleOption> {
-    await runGoWASMinstance(); // set peginAddress in JS global scope
+    await runGoWASMinstance(); // set mainChainAddress in JS global scope
     return (p: ElementsPegin): void => {
       // @ts-ignore
-      p.peginAddress = peginAddress;
+      p.mainChainAddress = mainChainAddress;
     };
   }
 
@@ -183,7 +184,7 @@ async function runGoWASMinstance() {
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function(byte) {
+  return Array.from(byteArray, function (byte) {
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 }
