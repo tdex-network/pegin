@@ -6,6 +6,7 @@ import (
 	"syscall/js"
 
 	"github.com/btcsuite/btcd/chaincfg"
+	"github.com/vulpemventures/go-elements/elementsutil"
 	"github.com/vulpemventures/go-elements/pegin"
 )
 
@@ -16,8 +17,71 @@ var (
 // main binds go wrappers to js global scope functions
 func main() {
 	js.Global().Set("mainChainAddress", MainChainAddressWrapper())
+	js.Global().Set("claim", ClaimWrapper())
 
 	select {} // prevents the function to stop
+}
+
+func ClaimWrapper() js.Func {
+	return JSPromise(func(args []js.Value) (interface{}, error) {
+		if len(args) != 10 {
+			return nil, invalidArgsError
+		}
+
+		isMainnet := args[0].Bool()
+		isDynamicFedEnabled := args[1].Bool()
+		assetHashBytes, err := h2b(args[2].String())
+		if err != nil {
+			return nil, err
+		}
+
+		peggedAsset := append(
+			[]byte{0x01},
+			elementsutil.ReverseBytes(assetHashBytes)...,
+		)
+
+		parentGenesisBlockHash, err := h2b(args[3].String())
+		if err != nil {
+			return nil, err
+		}
+
+		fedPegScript, err := h2b(args[4].String())
+		if err != nil {
+			return nil, err
+		}
+
+		contract, err := h2b(args[5].String())
+		if err != nil {
+			return nil, err
+		}
+
+		btcTx, err := h2b(args[6].String())
+		if err != nil {
+			return nil, err
+		}
+
+		btcTxOutProof, err := h2b(args[7].String())
+		if err != nil {
+			return nil, err
+		}
+
+		claimScript, err := h2b(args[8].String())
+		if err != nil {
+			return nil, err
+		}
+
+		millisatPerByte := args[9].Float()
+
+		btcNet := getBtcNetwork(isMainnet)
+
+		tx, err := pegin.Claim(btcNet, isDynamicFedEnabled, peggedAsset, parentGenesisBlockHash, fedPegScript, contract, btcTx, btcTxOutProof, claimScript, millisatPerByte)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return tx.ToHex()
+	})
 }
 
 // MainChainAddressWrapper returns the js function for pegin.PeginAdress
@@ -40,10 +104,7 @@ func MainChainAddressWrapper() js.Func {
 		isDynamicFedEnabled := args[2].Bool()
 		isMainnet := args[3].Bool()
 
-		var btcNet *chaincfg.Params = &chaincfg.MainNetParams
-		if !isMainnet {
-			btcNet = &chaincfg.RegressionNetParams
-		}
+		btcNet := getBtcNetwork(isMainnet)
 
 		peginAddress, err := pegin.MainChainAddress(contract, btcNet, isDynamicFedEnabled, fedPegScript)
 		if err != nil {
@@ -52,6 +113,14 @@ func MainChainAddressWrapper() js.Func {
 
 		return peginAddress, nil
 	})
+}
+
+func getBtcNetwork(isMainnet bool) *chaincfg.Params {
+	btcNet := &chaincfg.MainNetParams
+	if !isMainnet {
+		btcNet = &chaincfg.RegressionNetParams
+	}
+	return btcNet
 }
 
 // encodes bytes to hex

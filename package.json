@@ -13,7 +13,9 @@
   "devDependencies": {
     "@types/jest": "^26.0.23",
     "@types/node": "^15.0.1",
+    "axios": "^0.21.1",
     "copyfiles": "^2.4.1",
+    "ldk": "^0.2.18",
     "liquidjs-lib": "^5.1.12",
     "tsdx": "^0.14.1",
     "tslib": "^2.2.0",
