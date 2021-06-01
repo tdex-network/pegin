@@ -14,8 +14,15 @@ jobs:
         node: ["12.x", "14.x"]
 
     steps:
+      - name: Reconfigure git to use HTTP authentication
+        run: > 
+          git config --global url."https://github.com/".insteadOf
+          ssh://git@github.com/
+
       - name: Checkout repo
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false
 
       - name: Use Node ${{ matrix.node }}
         uses: actions/setup-node@v1
@@ -31,11 +38,7 @@ jobs:
       - name: Compile WASM
         run: |
           # git submodules
-          git submodule update --init 
-          cd libwally-core
-          git submodule update --init
-          cd ..
-
+          git submodule update --init --recursive
           # compile to wasm with dockers
           make build
 
