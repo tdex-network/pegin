@@ -14,26 +14,26 @@ export default class ElementsPegin implements ElementsPeginInterface {
   private wallycore: any;
   private mainChainAddress:
     | ((
-        contract: string,
-        fedPegScript: string,
-        isDynaFed: boolean,
-        isMainnet: boolean
-      ) => Promise<string>)
+      contract: string,
+      fedPegScript: string,
+      isDynaFed: boolean,
+      isMainnet: boolean
+    ) => Promise<string>)
     | undefined;
 
   private claim:
     | ((
-        isMainnet: boolean,
-        isDynaFed: boolean,
-        peggedAsset: string,
-        parentGenesisBlockHash: string,
-        fedPegScript: string,
-        contract: string,
-        btcTx: string,
-        btcTxOutProof: string,
-        claimScript: string,
-        millisatPerByte: number
-      ) => Promise<string>)
+      isMainnet: boolean,
+      isDynaFed: boolean,
+      peggedAsset: string,
+      parentGenesisBlockHash: string,
+      fedPegScript: string,
+      contract: string,
+      btcTx: string,
+      btcTxOutProof: string,
+      claimScript: string,
+      millisatPerByte: number
+    ) => Promise<string>)
     | undefined;
 
   private isMainnet: boolean = true;
@@ -50,7 +50,7 @@ export default class ElementsPegin implements ElementsPeginInterface {
     btcTx: string,
     btcTxOutProof: string,
     claimScript: string,
-    millisatPerByte: number = 0.1
+    millisatPerByte: number = 1
   ): Promise<string> {
     if (!this.claim) throw new Error('need claim to be defined');
 
@@ -248,7 +248,7 @@ async function runGoWASMinstance() {
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function(byte) {
+  return Array.from(byteArray, function (byte) {
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 }
