@@ -1,6 +1,6 @@
-import ElementsPegin from '../src';
-import { confidential, ECPair, networks, Transaction, script as bscript, payments } from 'liquidjs-lib';
-// import { IdentityType, PrivateKey } from 'ldk';
+import ElementsPegin, { claimScriptToP2KHScript } from '../src';
+import { confidential, ECPair, networks, Transaction, script as bscript, address } from 'liquidjs-lib';
+import { IdentityType, PrivateKey } from 'ldk';
 import { broadcastLiquid, faucetBTC, fetchTxBTC, getTxOutProof, sleep } from './utils';
 import * as btclib from 'bitcoinjs-lib';
 
@@ -22,50 +22,31 @@ describe('claimTx', () => {
   });
 
   it('should broadcast a pegin transaction created with claim function', async () => {
-    // const identity = new PrivateKey({
-    //   chain: 'regtest',
-    //   type: IdentityType.PrivateKey,
-    //   value: {
-    //     signingKeyWIF,
-    //     blindingKeyWIF: 'cRdrvnPMLV7CsEak2pGrgG4MY7S3XN1vjtcgfemCrF7KJRPeGgW6',
-    //   },
-    // });
+    const identity = new PrivateKey({
+      chain: 'regtest',
+      type: IdentityType.PrivateKey,
+      value: {
+        signingKeyWIF,
+        blindingKeyWIF: 'cRdrvnPMLV7CsEak2pGrgG4MY7S3XN1vjtcgfemCrF7KJRPeGgW6',
+      },
+    });
     const ecPair = ECPair.fromWIF(signingKeyWIF, networks.regtest);
 
-    const p2wkh = payments.p2wpkh({
-      pubkey: ecPair.publicKey,
-      network: networks.regtest
-    }).output!;
-
-    // const claimScript = address.toOutputScript((await identity.getNextAddress()).confidentialAddress).toString('hex');
-    const claimScript = p2wkh.toString('hex');
+    const claimScript = address.toOutputScript((await identity.getNextAddress()).confidentialAddress).toString('hex');
     const mainChainAddr = await peginModule.getMainchainAddress(claimScript);
-    console.log(mainChainAddr)
     const btcTxID = await faucetBTC(mainChainAddr);
-    console.log(btcTxID)
     await sleep(5000);
     const btcTxOutProof = await getTxOutProof(btcTxID);
-    console.log('btc outproof = ', btcTxOutProof);
     const btcTxHex = await fetchTxBTC(btcTxID);
-    console.log('btc hex = ', btcTxHex);
     let claimTx = await peginModule.claimTx(btcTxHex, btcTxOutProof, claimScript);
-    console.log('claimTx = ', claimTx);
     const transaction = Transaction.fromHex(claimTx)
 
     const prevoutTx = btclib.Transaction.fromHex(btcTxHex);
     const amountPegin = prevoutTx.outs[transaction.ins[0].index].value;
-    // const prevoutScript = prevoutTx.outs[transaction.ins[0].index].script;
-    console.log("amount pegin = ", amountPegin);
-
-    console.log(claimScript)
-    const p = payments.p2pkh({
-      pubkey: ecPair.publicKey,
-      network: networks.regtest
-    }).output!;
 
     const sigHash = transaction.hashForWitnessV0(
       0,
-      p,
+      Buffer.from(claimScriptToP2KHScript(claimScript), 'hex'),
       confidential.satoshiToConfidentialValue(amountPegin),
       Transaction.SIGHASH_ALL
     )
@@ -74,8 +55,6 @@ describe('claimTx', () => {
     const signatureWithHashType = bscript.signature.encode(sig, Transaction.SIGHASH_ALL)
     transaction.ins[0].witness = [signatureWithHashType, ecPair.publicKey];
     claimTx = transaction.toHex();
-
-    console.log('claimTx with witness = ', claimTx);
 
     const txid = await broadcastLiquid(claimTx);
     console.log('txid = ', txid)

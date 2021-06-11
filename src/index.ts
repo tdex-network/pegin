@@ -265,3 +265,7 @@ function hexStringToBytes(str: string): Uint8Array {
 
   return new Uint8Array(a);
 }
+
+export function claimScriptToP2KHScript(claimScript: string) {
+  return `76a9${claimScript.slice(2)}88ac`
+}
