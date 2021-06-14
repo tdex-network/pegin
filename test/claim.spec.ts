@@ -1,4 +1,4 @@
-import ElementsPegin, { claimScriptToP2KHScript } from '../src';
+import ElementsPegin, { claimScriptToP2PKHScript } from '../src';
 import {
   confidential,
   ECPair,
@@ -65,7 +65,7 @@ describe('claimTx', () => {
 
     const sigHash = transaction.hashForWitnessV0(
       0,
-      Buffer.from(claimScriptToP2KHScript(claimScript), 'hex'),
+      Buffer.from(claimScriptToP2PKHScript(claimScript), 'hex'),
       confidential.satoshiToConfidentialValue(amountPegin),
       Transaction.SIGHASH_ALL
     );
