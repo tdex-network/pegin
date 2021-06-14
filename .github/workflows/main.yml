@@ -42,6 +42,12 @@ jobs:
           # compile to wasm with dockers
           make build
 
+      - name: Install Nigiri
+        run: |
+          mkdir -p tmp; cd tmp
+          curl https://travis.nigiri.network | bash; cd ..
+          docker-compose -f  tmp/docker-compose.yml up -d
+
       - name: Test
         run: npm test --ci --coverage --maxWorkers=2
 

@@ -50,7 +50,7 @@ export default class ElementsPegin implements ElementsPeginInterface {
     btcTx: string,
     btcTxOutProof: string,
     claimScript: string,
-    millisatPerByte: number = 0.1
+    millisatPerByte: number = 1
   ): Promise<string> {
     if (!this.claim) throw new Error('need claim to be defined');
 
@@ -264,4 +264,8 @@ function hexStringToBytes(str: string): Uint8Array {
   }
 
   return new Uint8Array(a);
+}
+
+export function claimScriptToP2PKHScript(claimScript: string) {
+  return `76a9${claimScript.slice(2)}88ac`;
 }
