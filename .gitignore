@@ -103,6 +103,9 @@ dist
 # TernJS port file
 .tern-port
 
+# Webstorm
+.idea/
+
 /resources/elements.wasm
 /resources/elements.js
 /resources/wallycore.js
