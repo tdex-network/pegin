@@ -211,6 +211,10 @@ export default class ElementsPegin implements ElementsPeginInterface {
     };
   }
 
+  public static claimScriptToP2PKHScript(claimScript: string): string {
+    return `76a9${claimScript.slice(2)}88ac`;
+  }
+
   public static PARENT_BLOCK_HASH =
     '0f9188f13cb7b2c71f2a335e3a4fc328bf5beb436012afca590b1a11466e2206';
 
@@ -264,8 +268,4 @@ function hexStringToBytes(str: string): Uint8Array {
   }
 
   return new Uint8Array(a);
-}
-
-export function claimScriptToP2PKHScript(claimScript: string) {
-  return `76a9${claimScript.slice(2)}88ac`;
 }
