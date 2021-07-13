@@ -146,7 +146,7 @@ export default class ElementsPegin implements ElementsPeginInterface {
       );
     }
 
-    const written = this.wallycore.getValue(numOfBytesPtr);
+    const written = this.wallycore.getValue(numOfBytesPtr, 'i32');
 
     const contractString = toHexString(this.readBytes(contractPtr, written));
 
