@@ -19,7 +19,7 @@ export async function broadcastLiquid(tx: string) {
   try {
     return (await axios.post(`${LIQUID_URL}/tx`, tx)).data;
   } catch (err) {
-    console.error(err)
+    console.error(err);
   }
 }
 
