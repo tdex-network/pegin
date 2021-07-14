@@ -16,7 +16,11 @@ export async function getTxOutProof(txID: string) {
 }
 
 export async function broadcastLiquid(tx: string) {
-  return (await axios.post(`${LIQUID_URL}/tx`, tx)).data;
+  try {
+    return (await axios.post(`${LIQUID_URL}/tx`, tx)).data;
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 export function sleep(ms: number) {
