@@ -14,31 +14,33 @@ export default class ElementsPegin implements ElementsPeginInterface {
   private wallycore: any;
   private mainChainAddress:
     | ((
-      contract: string,
-      fedPegScript: string,
-      isDynaFed: boolean,
-      isMainnet: boolean
-    ) => Promise<string>)
+        contract: string,
+        fedPegScript: string,
+        isDynaFed: boolean,
+        isMainnet: boolean
+      ) => Promise<string>)
     | undefined;
 
   private claim:
     | ((
-      isMainnet: boolean,
-      isDynaFed: boolean,
-      peggedAsset: string,
-      parentGenesisBlockHash: string,
-      fedPegScript: string,
-      contract: string,
-      btcTx: string,
-      btcTxOutProof: string,
-      claimScript: string,
-      millisatPerByte: number
-    ) => Promise<string>)
+        isMainnet: boolean,
+        isDynaFed: boolean,
+        peggedAsset: string,
+        parentGenesisBlockHash: string,
+        fedPegScript: string,
+        contract: string,
+        btcTx: string,
+        btcTxOutProof: string,
+        claimScript: string,
+        millisatPerByte: number
+      ) => Promise<string>)
     | undefined;
 
   private isMainnet: boolean = true;
   private isDynamicFederation: boolean = false;
   private federationScript: string = ElementsPegin.MAINNET_FED_SCRIPT;
+  private peggedAsset: string =
+    '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d';
 
   constructor(...options: PeginModuleOption[]) {
     for (const option of options) {
@@ -67,7 +69,7 @@ export default class ElementsPegin implements ElementsPeginInterface {
     return this.claim(
       this.isMainnet,
       this.isDynamicFederation,
-      this.getPeggedAsset(),
+      this.peggedAsset,
       this.getParentBlockHash(),
       this.federationScript,
       contract,
@@ -163,13 +165,9 @@ export default class ElementsPegin implements ElementsPeginInterface {
   }
 
   private getParentBlockHash(): string {
-    return this.isMainnet ? ElementsPegin.MAINNET_PARENT_BLOCK_HASH : ElementsPegin.TESTNET_PARENT_BLOCK_HASH;
-  }
-
-  private getPeggedAsset(): string {
     return this.isMainnet
-      ? '6f0279e9ed041c3d710a9f57d0c02928416460c4b722ae3457a11eec381c526d'
-      : '5ac9f65c0efcc4775e0baec4ec03abdde22473cd3cf33c0419ca290e0751b225';
+      ? ElementsPegin.MAINNET_PARENT_BLOCK_HASH
+      : ElementsPegin.TESTNET_PARENT_BLOCK_HASH;
   }
 
   public static withFederationScript(federationScript: string) {
@@ -190,9 +188,12 @@ export default class ElementsPegin implements ElementsPeginInterface {
     };
   }
 
-  public static withTestnet() {
+  public static withTestnet(peggedAsset?: string) {
     return (mod: ElementsPegin) => {
       mod.isMainnet = false;
+      mod.peggedAsset = peggedAsset
+        ? peggedAsset
+        : '5ac9f65c0efcc4775e0baec4ec03abdde22473cd3cf33c0419ca290e0751b225';
     };
   }
 
@@ -259,7 +260,7 @@ async function runGoWASMinstance() {
 }
 
 function toHexString(byteArray: Uint8Array): string {
-  return Array.from(byteArray, function (byte) {
+  return Array.from(byteArray, function(byte) {
     return ('0' + (byte & 0xff).toString(16)).slice(-2);
   }).join('');
 }
