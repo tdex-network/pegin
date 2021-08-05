@@ -1,6 +1,6 @@
 {
   "name": "pegin",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "TS package using wasm from go-elements and libwally-core",
   "main": "./dist/index.js",
   "files": [
