@@ -2,7 +2,40 @@
 
 TypeScript module to pegin Bitcoin into Liquid Bitcoin in the browser
 
-## Build & Test
+
+## Usage
+
+
+Install from npm
+
+```sh
+npm install --save pegin
+# or with yarn
+yarn add pegin
+```
+
+Use in your JavaScript or TypeScript project, works in the browser!
+
+```ts
+import ElementsPegin from 'pegin';
+
+const peginModule = new ElementsPegin(
+  await ElementsPegin.withGoElements(),
+  await ElementsPegin.withLibwally(),
+  // Optionals, defaults are dynfed is off, mainnet and hardcoded fedpeg script
+  ElementsPegin.withDynamicFederation(false),
+  ElementsPegin.withMainnet(),
+  ElementsPegin.withFederationScript('my_Fed_Peg_Script_XXXYYYXXX')
+);
+
+const address = await peginModule.getMainchainAddress(
+  '0014efcee7e291eb23654650b3eb950fca21d01ee37e' // Liquid script
+);
+
+console.log(address); // Bitcoin address
+```
+
+## Development
 
 ### Compile wasm wrappers
 
@@ -26,27 +59,6 @@ npm test
 
 ```sh
 npm run build
-```
-
-## Usage
-
-```ts
-import ElementsPegin from 'pegin';
-
-const peginModule = new ElementsPegin(
-  await ElementsPegin.withGoElements(),
-  await ElementsPegin.withLibwally(),
-  // Optionals, defaults are dynfed is off, mainnet and hardcoded fedpeg script
-  ElementsPegin.withDynamicFederation(false),
-  ElementsPegin.withMainnet(),
-  ElementsPegin.withFederationScript('my_Fed_Peg_Script_XXXYYYXXX')
-);
-
-const address = await peginModule.getMainchainAddress(
-  '0014efcee7e291eb23654650b3eb950fca21d01ee37e' // Liquid script
-);
-
-console.log(address); // Bitcoin address
 ```
 
 ## Project
