@@ -21,7 +21,7 @@ describe('getpeginaddress', () => {
     const address = await peginModule.getMainchainAddress(
       peginContractFixture.script
     );
-    assert.strictEqual(address, '3AV836ASdCs6k25KjFweWxXNKyJdNx2tFh');
+    assert.strictEqual(address, '3HfF9gFpqZPxfGe4rtwWD7nxFpvrL6xZq5');
   });
 
   it('should return pegin address (P2WSH with dynafed = true)', async () => {
